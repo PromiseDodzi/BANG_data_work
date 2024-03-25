@@ -1,6 +1,8 @@
 import re
 import pandas as pd
 import numpy as np
+
+
 class NounParser:
     def __init__(self):
         self.consonants = {"b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "ʔ", "ɲ", "ŋ"}
@@ -16,8 +18,8 @@ class NounParser:
                              'ɔ': 'ɔ', 'ɔ́': 'ɔ́',' ̀ɔ ': ' ̀ɔ ', 'ɔ̌':'ɔ́', 'ɔ̂': ' ̀ɔ ', 
                              "a": "a", 'á': 'á','à':'à',  'ǎ': 'á', 'â':'à'}
 
-    def parse_durationals(self, item):
-        "Replaces durationals with the preceding vowel"
+    def first_parse_durationals(self, item):
+        "Replaces durationals with the preceding vowel for very problematic cases where python does not consider vowel-tones ensembles as units"
         new_word = ""
         for alphabet in item:
             if alphabet == ":":
@@ -30,6 +32,20 @@ class NounParser:
             else:
                 new_word += alphabet
         return new_word
+
+    def second_parse_durationals(self, word):
+        "normal parsing of durationals by doubling the vowel with the durational feature"
+ 
+        new_word=""
+        for index, letter in enumerate(word):
+            if letter==":":
+                letter=f"-{self.replacements.get(word[index -1],word[index -1])}"
+                new_word += letter
+            else:
+                new_word +=letter
+                
+        return new_word.replace("--", "-")
+    
 
     def cvcv_segmentation(self, word, indexes=[3, 5, 7, 9, 11]):
         """Parses syllables to follow a cvcv basic structure"""
