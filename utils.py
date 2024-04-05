@@ -5,7 +5,7 @@ import numpy as np
 
 class NounParser:
     def __init__(self):
-        self.consonants = {"b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "ʔ", "ɲ", "ŋ"}
+        self.consonants = {"b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "ʔ", "ɲ", "ŋ", "ɣ"}
         self.exceptions = ["nd", "nt", "ŋg", "ŋk", "ɲj", "mb","mp" ]
         self.vowels = {"ɛ̌", "ɔ̌", "ɛ̂", "ɔ̂", "ɛ́", "ɔ́", "ɛ̀", "ɔ̀", "ì", "í", "ǔ", "û",'ê', 'ě', 'è', 'é', 'ô', 'ò', 'ǒ', 'ó', 'ǎ', 
                         'â', 'à', 'á', 'ɛ̌', 'ɛ̂', 'ɛ́', 'ɛ̀', 'û', 'ǔ', 'ú', 'ù', 'ǐ', 'î', 'í', 'ì', ' ̀ɔ ', 'ɔ́', 'ɔ̌', 'ɔ̂',
@@ -14,24 +14,45 @@ class NounParser:
                              'ɛ́':'ɛ́', 'ɛ̀': 'ɛ̀', "ɛ̌":'ɛ́', 'ɛ̂': 'ɛ̀',"u": "u", 'ú': 'ú', 'ù': 'ù',"ǔ":'ú', "û": 'ù',"o": "o", 'ó': 'ó', 
                              'ò': 'ò', 'ǒ': 'ó', 'ô': 'ò','ɔ': 'ɔ', 'ɔ́': 'ɔ́',' ̀ɔ ': ' ̀ɔ ', 'ɔ̌':'ɔ́', 'ɔ̂': ' ̀ɔ ', "a": "a", 'á': 'á',
                              'à':'à',  'ǎ': 'á', 'â':'à'}
+        self.extra_material={ 'ǎ': 'á', 'ê': 'è', 'ô': 'ò', 'ě': 'é','ǐ': 'í', 'î': 'ì', 'ǒ': 'ó', 'â': 'à', 'ɛ́': 'ɛ́', 'ɛ̀': 'ɛ̀', 
+                             'ǔ': 'ú', 'í': 'í','ì': 'ì'} 
+        
+
+    def existing_parses(self, word):
+        """
+        reparses existing parses:
+        hyphens in word-final syllables are eliminated.
+        hyphens elsewhere indicate word boundaries
+        """
+        new_word=""
+        for index, letter in enumerate(word):
+            idx=len(word)-index
+            if letter== "-" and idx <=3:
+                new_word += ""
+            elif letter== "-" and idx >3:
+                new_word += " "
+            else:
+                new_word += letter
+        return  new_word    
 
     def first_parse_durationals(self, item):
         """
         Replaces durationals with the preceding vowel for very problematic cases where python does not consider vowel-tones ensembles as units
         """
         new_word = ""
-        for alphabet in item:
+        for index, alphabet in enumerate(item):
             if alphabet == ":":
-                if item.index(alphabet) > 1 and item[item.index(alphabet)-1] in self.replacements.values():
-                    new_word += self.replacements[item[item.index(alphabet)-1]]
-                elif item.index(alphabet) > 2 and item[item.index(alphabet)-2] in self.replacements.values():
-                    new_word += self.replacements[item[item.index(alphabet)-2]]
+                if index > 0 and item[index-1] in self.replacements.values():
+                    new_word += self.replacements[item[index-1]]
+                elif index > 1 and item[index-2] in self.replacements.values():
+                    new_word += self.replacements[item[index-2]]
                 else:
                     new_word += alphabet
             else:
                 new_word += alphabet
         return new_word
 
+    
     def second_parse_durationals(self, word):
         """
         normal parsing of durationals by doubling the vowel with the durational feature
@@ -138,47 +159,44 @@ class NounParser:
 
 
 
-class VerbParser:
+class VerbParser(NounParser):
     def __init__(self):
-        self.vowels = {
-            "ɛ̌", "ɔ̌", "ɛ̂", "ɔ̂", "ɛ́", "ɔ́", "ɛ̀", "ɔ̀", "ì", "í", "ǔ", "û", 'ê', 'ě', 'è', 'é', 'ô', 'ò', 'ǒ', 'ó',
-            'ǎ', 'â', 'à', 'á', 'ɛ̌', 'ɛ̂', 'ɛ́', 'ɛ̀', 'û', 'ǔ', 'ú', 'ù', 'ǐ', 'î', 'í', 'ì', ' ̀ɔ ', 'ɔ́', 'ɔ̌',
-            'ɔ̂', "i", "e", "ɛ", "u", "o", "ɔ", "a"
-        }
-        self.consonants = {
-            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "z", "ʔ",
-            "ɲ", "ŋ"
-        }
-        self.replacements={
-            "ɛ̌": "ɛ́", "ɔ̌": "ɔ́", "ɛ̂": "ɛ̀", "ɔ̂": "ɔ̀","ɛ́": "ɛ́", "ɔ́": "ɔ́", "ɛ̀": "ɛ̀", "ɔ̀": "ɔ̀","ì": "ì", "í": "í",
-            "ǔ": "ú", "û": "ù"
-        }
+       super().__init__()
+        
+    def consonant_count(self, item):
+        """
+        counts number of consonants in words
+        """
+        
+        if item is None:
+            return 0
+        
+        consonant_count=0
+        for letter in item:
+            if letter != "ⁿ" and letter in self.consonants:
+                consonant_count +=1
+        return consonant_count
+                      
 
-        self.extra_material={  
-            'ǎ': 'á', 'ê': 'è', 'ô': 'ò', 'ě': 'é','ǐ': 'í', 'î': 'ì', 'ǒ': 'ó', 'â': 'à', 'ɛ́': 'ɛ́', 'ɛ̀': 'ɛ̀',
-            'ǔ': 'ú', 'í': 'í','ì': 'ì'
-        }# Handle cases with extracted vowels 
-        self.exceptions = ["nd", "nt", "ŋg", "ɲj", "mb"] #nasalized consonants in data
-
-    def parse_durationals(self, item):
+    def first_parse_durationals(self, item):
         """Double cases where a vowel has durataional marking"""
       
         def get_last_vowel(item):
             """Extracts the last vowel from the input string ending with ':'"""
-            if item.endswith(":"):
+            if item.endswith(":") or item.endswith(":"):
                 return item[-2]
             return None
 
         vowels = [get_last_vowel(item)] # extracting vowels 
         for letter in self.replacements:     # Handle exceptions like 'tɔ́d-ɛ̀:' and 'nàrⁿ-ɛ́:'
-            if item.endswith(letter + ':'):
+            if item.endswith(letter + ':') or item.endswith(letter + ":"):
                 return item[:-1] + "-" + self.replacements[letter]
 
         if 'ɛ᷈:' in item:                # Handle the exceptional case 'jɛ᷈:'
             return item[:-1] + "-ɛ᷈"
 
         for letter in self.replacements:     # Handle cases of unextracted vowels
-            if item.endswith(":"):
+            if item.endswith(":") or item.endswith(":"):
                 if letter in item[1:4]:
                     return item[:-1] + "-" + self.replacements[letter]
         material = self.extra_material.get(vowels[0], vowels[0])
@@ -186,19 +204,35 @@ class VerbParser:
         return self.second_parse_durationals(item[:-1] + "-" + material if vowels[0] else item)
 
     def second_parse_durationals(self, word):
+            """
+            normal parsing of durationals by doubling the vowel with the durational feature. This is neccesary to ensure no leftovers from first parse
+            """
+        
+            new_word=""
+            for index, letter in enumerate(word):
+                idx=len(word)-index
+                if letter==":" or letter==":" and idx !=0:
+                    letter=f"{self.replacements.get(word[index -1],word[index -1])}"
+                    new_word += letter
+                elif letter==":" or letter==":" and idx ==0:
+                    letter=f"-{self.replacements.get(word[index -1],word[index -1])}"
+                    new_word += letter  
+                else:
+                    new_word +=letter
+            return new_word.replace("--", "-")
+
+    def post_editing_short_strings(self, word):
         """
-        normal parsing of durationals by doubling the vowel with the durational feature. This is neccesary to ensure no leftovers from first parse
+        post edits short words that have been "over-parsed" as a result of issues encountered with character fonts
         """
-    
-        new_word=""
-        for index, letter in enumerate(word):
-            if letter==":":
-                letter=f"-{self.replacements.get(word[index -1],word[index -1])}"
-                new_word += letter
-            else:
-                new_word +=letter
-                
-        return new_word.replace("--", "-")
+        
+        if word is None:
+            return None
+        
+        consonant_count=self.consonant_count(word)
+        if consonant_count <=2 and word.count("-") >1:
+            word=word.replace("-", "", 1)
+        return word
         
     def hyphen_space(self, word):
         """
@@ -206,7 +240,7 @@ class VerbParser:
         """
         new_word=""
         for index, letter in enumerate(word):
-            if letter== "-" and (word[index+1]== " " or word[index-1]== " ") :
+            if letter== "-" and index+1 < len(word) and (word[index+1]== " " or word[index-1]== " ") :
                 new_word += ""
             else:
                 new_word +=  letter
@@ -215,19 +249,41 @@ class VerbParser:
     
     def maintaining_nasality_on_segment(self, word):
         """
-        ensures that nasality remains on segment that is marked for it
+        ensures that nasality remains on segment that is marked for it, and also parses sounds occuring after the nasal marker  
         """
         new_word=""
         for index, letter in enumerate(word):
-            if letter == "-" and word[index + 1]== "ⁿ":
+            if letter == "-" and index + 1 < len(word) and word[index + 1]== "ⁿ":         #solve zǐǐ-ⁿ zǐ-ǐⁿ from here
                 new_word +=""
             else:
                 new_word += letter
-        return self.hyphen_space(new_word)
+    
+        word=""
+        for index, letter in enumerate(new_word):
+            idx=len(new_word)-index
+            if letter == "ⁿ" and 3 >= idx > 1:
+                if new_word[index]!= "-":
+                    word += f"{letter}-"
+    
+            else:
+                word +=letter
+        
+        
+        if "-" not in word:
+            new_word=""
+            for index, letter in enumerate(word):
+                if letter not in self.consonants and index+1 < len(word) and "ⁿ" in word[index: index+2]:
+                    new_word += f"-{letter}"
+                else:
+                    new_word +=letter
+            return self.hyphen_space(new_word)
+        else:       
+            return self.hyphen_space(word)
+        
 
     def verify_exceptions(self, word):
         """
-        verifies that consonant ensembles are not parsed as different consonants
+        verifies that consonant ensembles are not parsed as different consonants and reparses long words with consonant ensembles
         """
         for i in self.exceptions:
             with_hyphen = i[0] + "-" + i[1]
@@ -235,7 +291,9 @@ class VerbParser:
                 idx = word.index(with_hyphen)
                 word = word[:idx] + i + "-" + word[idx + 3:]
         word = word.replace("--", "-")
+        
         return self.maintaining_nasality_on_segment(word)
+            
 
     def vowel_tone_hyphen(self, word):
         """
@@ -289,28 +347,167 @@ class VerbParser:
             return self.post_coda(item[:-1] + "-" + item[-1:])
         return self.post_coda(item)
 
-    def long_words(self, word):
+    def special_long_words(self, word):
         """
-        takes word of length 5 and parses them into CVC
+        takes word of length 5 and parses them into CVC: this is because of the font-recognition issues encountered
         """
         current_syllable = ''
         consonant_count = 0
 
         for i in range(len(word)):
-            if word[i] in self.consonants:
+            if word[i] != "ⁿ" and word[i] in self.consonants:
                 consonant_count += 1
                 if consonant_count == 2 and i < len(word):
                     word = word[:i + 1] + '-' + word[i + 1:]
                     consonant_count = 0
         return self.post_coda(word)
+   
+    
+    def long_words(self, word):
+        """
+        parses long words according to a cvc priority structure and also takes care of idiosyncratic words
+        """
+        num=[2,4,6,8]
+        new_word="" #word parsed according to cvc priority
+        consonant_count=0
+        for index, letter in enumerate(word):
+            
+            if letter == " " or letter== "ⁿ":
+                consonant_count=0
+                new_word +=letter
+                
+            elif letter!= "ⁿ" and letter in self.consonants: #just to be extra sure
+                consonant_count +=1
+                if consonant_count in num:
+                    new_word += f"{letter}-"
+                elif consonant_count==3 and word[index-1] != " ":
+                    new_word +=f"-{letter}"
+                else:
+                    new_word += letter
+                    
+            else:
+                new_word +=letter
+    
+        if " "  in new_word and "-" not in new_word[new_word.index(" "):]:   #parsing words such as "gúr-ɔ́ gùrɔ́" which have second parts not responding to code above so they become "gúr-ɔ́ gùr-ɔ́"
+            consonant_count=self.consonant_count(new_word[new_word.index(" "):])
+            if consonant_count >=2 and new_word[-1] not in self.consonants:
+                conso=[x for x in new_word[new_word.index(" "):] if x in self.consonants]
+                idx=new_word.index(conso[1])
+                new_word=new_word[:idx+1] + "-" + new_word[idx+1:] 
+        
+        new_word=new_word[:-1].replace("--", "-") if new_word[-1] == '-' else new_word.replace("--", "-")
+ 
+        return self.verify_exceptions(new_word)
 
+
+    
     def segment_cvcs(self, item):
         """
         main segmentation function to be implemented after parse_durationals has been implemented
         """
         if len(item) >= 5:
-            return self.long_words(item) #calling long_words function
+            return self.long_words(item)
         elif 3 <= len(item) <= 4:
             return self.special_mid_forms(item) #calling special_mid_forms function
         else:
             return self.post_coda(item) #directly sending words to post_coda function for parsing
+
+
+
+
+
+
+class AdjectiveNumeralParser(VerbParser):
+    def __init__(self):
+        super().__init__()
+
+    def isolating_suffixes(self,item):
+
+        """
+        parses suffixes of adjectives and numerals i.e. vowels and 'y'
+        """
+        
+        consonants=self.consonant_count(item)
+        if consonants >=2:
+            new_word=""
+            idxs=[index for index,letter in enumerate(item) if letter in self.consonants and letter != "ⁿ"] #usual cases
+            for index, letter in enumerate(item):
+                if index==idxs[-1] and item[index-1] != "-":
+                    if  index+1 >len(item) :
+                        new_word += f"-{letter}"
+                    elif index+1 < len(item) and item[index+1]=="ⁿ":
+                        new_word += f"-{letter}"
+                    else: 
+                        new_word += f"{letter}-"
+                else: 
+                    new_word += letter
+        elif consonants <2 and len(item)>=3:
+            new_word=""
+            for letter in item:
+                if letter in self.consonants and letter != "ⁿ" and item[-1] != letter:
+                    new_word += f"{letter}-"
+                else:
+                    new_word+=letter
+        else:
+            new_word=item
+            
+    
+        if new_word.endswith("-") and new_word.index("-")+1 < len(new_word) and new_word[new_word.index("-")-1]=="y": #the case of 'y'
+            new_word=new_word[:new_word.index("-")-1] + "-" + new_word[new_word.index("-")-1:new_word.index("-")]
+        elif new_word.endswith("-"):
+            new_word=new_word[:-1]
+        else:
+            new_word=new_word
+            
+        return new_word
+    
+    def y_suffixes(self, item):
+        """
+        further parses y suffixes due to font instabilities
+        """
+        if item.endswith("y") and "-" not in item:
+            return item[:item.index("y")] + "-" + item[item.index("y"):]
+        else:
+            return item
+    
+    
+    def replace_hyphens_keep_last(self, item):
+
+        """
+        corrects overgeneralizations from isolating suffixes method and makes sure only suffixes are parsed
+        """
+        parts=item.rsplit("-",1)
+        if len(parts)==2:
+            first_part,last_part=parts
+            if last_part[-1] in self.consonants and last_part[-1] != "y":
+                return first_part.replace("-", "")+ "-" + last_part
+            else:
+                return first_part.replace("-", "")+ "-" + last_part
+        else:
+            return item
+    
+    def switch_hyphen_position(self, item):
+        """
+        corrects parses where hyphen occurs on the opposite side of expected position
+        """
+        if "-" in item:
+            hyphen_index = item.index("-")
+            if len(item) > hyphen_index + 1 and item[hyphen_index + 1] != "y" and item[hyphen_index + 1] in self.consonants:
+                if len(item) > hyphen_index + 2 and item[hyphen_index+2] in self.vowels:
+                    word = item[:hyphen_index] + item[hyphen_index + 1] + "-" + item[-1:]
+                    return word
+        return item  
+    
+    def miscellaneous(self, input_string):
+        """
+        fourre tout method to handle adhoc cases of wrong parse as a result of font instability
+        """
+        x = [i for i in range(len(input_string)) if i > 0 and i < len(input_string) - 3]     #handles cases such as in "núm-ɔ̀ẁ"
+        if "-" in input_string and input_string.index("-") in x and input_string[-1] != "y":
+            return input_string[:input_string.index("-")] + input_string[input_string.index("-") + 1:]
+    
+        y = [index for index, letter in enumerate(input_string) if letter == "ⁿ"]       #handles cases such as in "dííⁿ díí-wⁿ"
+        if "ⁿ" in input_string[:-2] and  "-" in input_string[:y[-1]] and input_string[y[-1]-1] in self.consonants and input_string[y[-1]-1] != "y":
+            return input_string[:input_string.index("-")] + input_string[input_string.index("-") + 1:]
+        else:
+            return input_string
