@@ -253,7 +253,7 @@ class VerbParser(NounParser):
         """
         new_word=""
         for index, letter in enumerate(word):
-            if letter == "-" and index + 1 < len(word) and word[index + 1]== "ⁿ":         #solve zǐǐ-ⁿ zǐ-ǐⁿ from here
+            if letter == "-" and index + 1 < len(word) and word[index + 1]== "ⁿ":         #zǐǐ-ⁿ zǐ-ǐⁿ can be solved from here but the fonts do not permit this
                 new_word +=""
             else:
                 new_word += letter
@@ -411,8 +411,6 @@ class VerbParser(NounParser):
             return self.special_mid_forms(item) #calling special_mid_forms function
         else:
             return self.post_coda(item) #directly sending words to post_coda function for parsing
-
-
 
 
 
