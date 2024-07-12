@@ -1,0 +1,6 @@
+[console_scripts]
+csvw2datasette = csvw.__main__:csvw2datasette
+csvw2json = csvw.__main__:csvw2json
+csvwdescribe = csvw.__main__:csvwdescribe
+csvwvalidate = csvw.__main__:csvwvalidate
+

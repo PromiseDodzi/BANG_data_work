@@ -10,15 +10,6 @@ class NounParser:
         self.vowels = {"ɛ̌", "ɔ̌", "ɛ̂", "ɔ̂", "ɛ́", "ɔ́", "ɛ̀", "ɔ̀", "ì", "í", "ǔ", "û",'ê', 'ě', 'è', 'é', 'ô', 'ò', 'ǒ', 'ó', 'ǎ', 
                         'â', 'à', 'á', 'ɛ̌', 'ɛ̂', 'ɛ́', 'ɛ̀', 'û', 'ǔ', 'ú', 'ù', 'ǐ', 'î', 'í', 'ì', ' ̀ɔ ', 'ɔ́', 'ɔ̌', 'ɔ̂',
                         "i", "e", "ɛ", "u", "o", "ɔ", "a"}
-        self.replacements = {"i":"i", 'í': 'í', 'ì': 'ì', 'ǐ': 'í','î': 'ì', "e": "e", 'é': 'é', 'è': 'è','ě': 'é', 'ê': 'è','ɛ':'ɛ', 
-                             'ɛ́':'ɛ́', 'ɛ̀': 'ɛ̀', "ɛ̌":'ɛ́', 'ɛ̂': 'ɛ̀',"u": "u", 'ú': 'ú', 'ù': 'ù',"ǔ":'ú', "û": 'ù',"o": "o", 'ó': 'ó', 
-                             'ò': 'ò', 'ǒ': 'ó', 'ô': 'ò','ɔ': 'ɔ', 'ɔ́': 'ɔ́','ɔ̀': 'ɔ̀', 'ɔ̌':'ɔ́', 'ɔ̂': ' ̀ɔ ', "a": "a", 'á': 'á',
-                             'à':'à',  'ǎ': 'á', 'â':'à'}
-        self.replacement_exceptions={'ǐ':'ì','î':'í','ě':'è','ê':'é',"ɛ̌":'ɛ̀','ɛ̂':'ɛ́',"ǔ":'ù',"û":'ú','ɔ̌':'ɔ̀','ɔ̂':'ɔ́','ǒ':'ò', 
-                                     'ô':'ó','ǎ':'à','â':'á'}
-        self.replacement_exceptions_1={'ǐ':'ì','î':'í','ě':'è','ê':'é',"ɛ̌":'ɛ̀','ɛ̂':'ɛ́',"ǔ":'ù',"û":'ú','ɔ̌':'ɔ̀','ɔ̂':'ɔ́','ǒ':'ò','ô':'ó','ǎ':'à','â':'á'}
-        self.replacement_exceptions_2={'ǐ':'í','î':'ì','ě':'é','ê':'è',"ɛ̌":'ɛ́','ɛ̂':'ɛ̀',"ǔ":'ú',"û":'ù','ɔ̌':'ɔ́','ɔ̂':'ɔ̀','ǒ':'ó','ô':'ò','ǎ':'á','â':'à'}
-        
         self.extra_material={ 'ǎ': 'á', 'ê': 'è', 'ô': 'ò', 'ě': 'é','ǐ': 'í', 'î': 'ì', 'ǒ': 'ó', 'â': 'à', 'ɛ́': 'ɛ́', 'ɛ̀': 'ɛ̀', 
                              'ǔ': 'ú', 'í': 'í','ì': 'ì'} 
 
@@ -64,27 +55,32 @@ class NounParser:
                 final_word_2 += letter
             
         return  final_word_2  
+        
 
-    
-    
-    def parse_noun_durationals(self, item):
+    def double_last_vowels(self, word):
         """
-        parses durational marking in nouns
+        parses durationals that have been replaced and where they are at the end of words
         """
-        new_word = ""
-        for index, letter in enumerate(item):                 #segments that preceed a durational and which have contour tones
-            if (letter in self.replacement_exceptions_1.keys() and 
-                index < len(item) - 1 and item[index + 1] == ":"):
-                new_word += str(self.replacement_exceptions_1.get(letter, letter)) 
-            elif (letter == ":" and                          #replacing durationals that are preceeded by a contour tone
-                  index > 0 and 
-                  item[index - 1] in self.replacement_exceptions_1.keys()):
-                new_word += str(self.replacement_exceptions_2.get(item[index - 1], letter))
-            elif letter ==":" and item[index-1] not in self.replacement_exceptions_1.keys():     #replacing durationals that are preceded by level tones
-                new_word += str(self.replacements.get(item[index-1],f"{ item[index-2]+ item[index-1]}" ))
+        counter = sum(1 for i in word if i in self.consonants)
+        processed = False
+        
+        if counter == 1 and all(["." in word,not processed]):
+            if "-" in word:
+                word = word.replace("-", "")
+                return word.replace(".", "-")
             else:
-                new_word +=letter
-        return new_word
+                return word.replace(".", "-")
+            processed = True
+        elif counter == 2 and all(["." in word, len(word) > 2, word[1] in self.consonants, not processed]):
+            if "-" in word:
+                word = word.replace("-", "")
+                return word.replace(".", "-")
+            else:
+                return word.replace(".", "-")
+            processed = True
+        
+        if not processed:
+            return word
     
 
     def cvcv_segmentation(self, word, indexes=[3, 5, 7, 9, 11]):
@@ -194,38 +190,52 @@ class VerbParser(NounParser):
             if letter != "ⁿ" and letter in self.consonants:
                 consonant_count +=1
         return consonant_count
-                      
-
-    def parse_verb_durationals(self, item):
-        """
-        parses durational marking in nouns
-        """
         
-        if item.endswith(":"):
-            new_word = ""
-            for index, letter in enumerate(item):                 #segments that preceed a durational and which have contour tones
-                if (letter in self.replacement_exceptions_1.keys() and 
-                    index < len(item) - 1 and item[index + 1] == ":"):
-                    new_word += str(self.replacement_exceptions_1.get(letter, letter)) 
-                elif (letter == ":" and                          #replacing durationals that are preceeded by a contour tone
-                      index > 0 and 
-                      item[index - 1] in self.replacement_exceptions_1.keys()):
-                    if index +1 == len(item):
-                        new_word += f"-{str(self.replacement_exceptions_2.get(item[index - 1], letter))}"
+                      
+    def long_words(self, word):
+        """
+        parses long words below 11 recognized forms
+        """
+        def stubborn_words(word):
+            """
+            parses unresponsive words
+            """
+            formatted_word=""
+            if 4 < len(word) <= 11 and "-" not in word:
+                formatted_word = word[:3] + "-" + word[3:]
+            else:
+                formatted_word=word
+            return formatted_word
+        
+        new_word_2=""
+        if len(word)<=11:
+            counter=0
+            new_word=""
+            if word in ["ɡìyɛ́", "ɡíyɛ́"]:
+                new_word = word[:3] + "-ɛ́" 
+            elif word in ["ɡɛ̀wɛ́"]:
+                new_word = word[:4] + "-ɛ́"     
+            else:
+                for idx, char in enumerate(word):
+                    if char in self.consonants:
+                        counter += 1
+                        if counter % 2 == 0 and idx + 1 < len(word) and word[idx + 1] not in self.consonants and word[idx + 1] in self.vowels:
+                            if word[idx -1] != " ":
+                                new_word += f"{char}-"
+                            else:
+                                new_word += char
+                        else:
+                            new_word += char
                     else:
-                        new_word += str(self.replacement_exceptions_2.get(item[index - 1], letter))
-                elif letter ==":" and item[index-1] not in self.replacement_exceptions_1.keys():     #replacing durationals that are preceded by level tones
-                    if index +1 == len(item):
-                        new_word += f"-{str(self.replacements.get(item[index-1],f"{ item[index-2]+ item[index-1]}" ))}"
-                    else:
-                        new_word += str(self.replacements.get(item[index-1],f"{ item[index-2]+ item[index-1]}" ))
-                else:
-                    new_word +=letter
+                        new_word += char
+            new_word_2=new_word
         else:
-            new_word=self.parse_noun_durationals(item)
-    
-        return new_word
+            new_word_2=word
+        
+        return stubborn_words(new_word_2)
 
+
+    
     def post_editing_short_strings(self, word):
         """
         post edits short words that have been "over-parsed" as a result of issues encountered with character fonts
@@ -368,41 +378,41 @@ class VerbParser(NounParser):
         return self.post_coda(word)
    
     
-    def long_words(self, word):
-        """
-        parses long words according to a cvc priority structure and also takes care of idiosyncratic words
-        """
-        num=[2,4,6,8]
-        new_word="" #word parsed according to cvc priority
-        consonant_count=0
-        for index, letter in enumerate(word):
+    # def long_words(self, word):
+    #     """
+    #     parses long words according to a cvc priority structure and also takes care of idiosyncratic words
+    #     """
+    #     num=[2,4,6,8]
+    #     new_word="" #word parsed according to cvc priority
+    #     consonant_count=0
+    #     for index, letter in enumerate(word):
             
-            if letter == "#" or letter== "ⁿ":
-                consonant_count=0
-                new_word +=letter
+    #         if letter == "#" or letter== "ⁿ":
+    #             consonant_count=0
+    #             new_word +=letter
                 
-            elif letter!= "ⁿ" and letter in self.consonants: #just to be extra sure
-                consonant_count +=1
-                if consonant_count in num:
-                    new_word += f"{letter}-"
-                elif consonant_count==3 and word[index-1] != " ":
-                    new_word +=f"-{letter}"
-                else:
-                    new_word += letter
+    #         elif letter!= "ⁿ" and letter in self.consonants: #just to be extra sure
+    #             consonant_count +=1
+    #             if consonant_count in num:
+    #                 new_word += f"{letter}-"
+    #             elif consonant_count==3 and word[index-1] != " ":
+    #                 new_word +=f"-{letter}"
+    #             else:
+    #                 new_word += letter
                     
-            else:
-                new_word +=letter
+    #         else:
+    #             new_word +=letter
     
-        if " "  in new_word and "-" not in new_word[new_word.index(" "):]:   #parsing words such as "gúr-ɔ́ gùrɔ́" which have second parts not responding to code above so they become "gúr-ɔ́ gùr-ɔ́"
-            consonant_count=self.consonant_count(new_word[new_word.index(" "):])
-            if consonant_count >=2 and new_word[-1] not in self.consonants:
-                conso=[x for x in new_word[new_word.index(" "):] if x in self.consonants]
-                idx=new_word.index(conso[1])
-                new_word=new_word[:idx+1] + "-" + new_word[idx+1:] 
+    #     if " "  in new_word and "-" not in new_word[new_word.index(" "):]:   #parsing words such as "gúr-ɔ́ gùrɔ́" which have second parts not responding to code above so they become "gúr-ɔ́ gùr-ɔ́"
+    #         consonant_count=self.consonant_count(new_word[new_word.index(" "):])
+    #         if consonant_count >=2 and new_word[-1] not in self.consonants:
+    #             conso=[x for x in new_word[new_word.index(" "):] if x in self.consonants]
+    #             idx=new_word.index(conso[1])
+    #             new_word=new_word[:idx+1] + "-" + new_word[idx+1:] 
         
-        new_word=new_word[:-1].replace("--", "-") if new_word[-1] == '-' else new_word.replace("--", "-")
+    #     new_word=new_word[:-1].replace("--", "-") if new_word[-1] == '-' else new_word.replace("--", "-")
  
-        return self.verify_exceptions(new_word)
+    #     return self.verify_exceptions(new_word)
 
 
     
@@ -411,7 +421,7 @@ class VerbParser(NounParser):
         main segmentation function to be implemented after parse_durationals has been implemented
         """
         if len(item) >= 5:
-            return self.long_words(item)
+            return item
         elif 3 <= len(item) <= 4:
             return self.special_mid_forms(item) #calling special_mid_forms function
         else:
