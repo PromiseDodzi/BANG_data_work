@@ -1,0 +1,3 @@
+[console_scripts]
+lingpy = lingpy.cli:main
+

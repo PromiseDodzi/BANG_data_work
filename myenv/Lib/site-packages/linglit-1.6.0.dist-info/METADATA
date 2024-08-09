@@ -1,0 +1,45 @@
+Metadata-Version: 2.1
+Name: linglit
+Version: 1.6.0
+Summary: Programmatic access to linguistic literature
+Home-page: UNKNOWN
+Author: Robert Forkel
+Author-email: robert_forkel@eva.mpg.de
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: Apache Software License
+Requires-Python: >=3.8
+License-File: LICENSE
+Requires-Dist: TexSoup
+Requires-Dist: attrs
+Requires-Dist: bs4
+Requires-Dist: clldutils (>=3.12)
+Requires-Dist: csvw
+Requires-Dist: lxml
+Requires-Dist: pycldf
+Requires-Dist: pyglottolog
+Requires-Dist: pyigt (>=1.4.1)
+Requires-Dist: pylatexenc
+Requires-Dist: thefuzz
+Requires-Dist: tqdm
+Requires-Dist: unidecode
+Provides-Extra: dev
+Requires-Dist: build ; extra == 'dev'
+Requires-Dist: flake8 ; extra == 'dev'
+Requires-Dist: twine ; extra == 'dev'
+Provides-Extra: speedup
+Requires-Dist: thefuzz[speedup] ; extra == 'speedup'
+Provides-Extra: test
+Requires-Dist: pytest-cov ; extra == 'test'
+Requires-Dist: pytest-mock ; extra == 'test'
+Requires-Dist: pytest (>=4.6) ; extra == 'test'
+Requires-Dist: tox ; extra == 'test'
+
+UNKNOWN
+

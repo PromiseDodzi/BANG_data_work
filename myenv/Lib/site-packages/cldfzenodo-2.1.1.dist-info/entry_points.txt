@@ -1,0 +1,6 @@
+[cldfbench.commands]
+zenodo = cldfzenodo.commands
+
+[pycldf_dataset_resolver]
+zenodo = cldfzenodo.api:ZenodoResolver
+

@@ -1,0 +1,2 @@
+[console_scripts]
+zenodo = zenodoclient.__main__:main

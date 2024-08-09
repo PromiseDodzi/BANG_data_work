@@ -1,0 +1,56 @@
+# Basic namespaces
+cogid	basictypes.integer	cogid
+doculect	str	doculect,language,taxa,taxon
+cogids	basictypes.ints	cogids
+concept	str	gloss,concept,concepts
+iso	str	iso,isocode
+tokens	basictypes.lists	tokens,tokenized_counterpart,ipatokens
+segments	basictypes.lists	segments
+
+alignment	basictypes.lists	alignment
+
+# specific names for alignments
+conceptid	int	conceptid
+
+# Specific namespaces for LexStat
+sonars	lambda x:[int(s) for s in x.split()]	sonars
+prostrings	str	prostrings
+numbers	lambda x:x.split()	numbers
+langid	str	langid
+classes	str	classes
+weights	lambda x:[float(y) for y in x.split()]	weights
+scaid	int	scaid
+lexstatid	int	lexstatid
+editid	int	editid
+turchinid	int	turchinid
+fuzzyid	lambda x:[int(s) for s in x.split()]	fuzzyid
+lingpyid	int	lingpyid
+
+# New namespaces for patchy cognates
+patchyid	int	patchyid
+papid	int	papid
+seedid	int	seedid
+customid	int	customid
+
+# New namespaces for makrocomparison
+makroid	int	makroid
+mikroid	int	mikroid
+mikro_entries	lambda x: [int(i) for i in x.split()]	mikro_entries
+
+# New namespaces for partial cognacy
+clusterid	int	clusterid
+clusterformat	lambda x: [int(i) for i in x.split()]	clusterformat
+morphemes	lambda x: x.split()	morphemes
+palignment	lambda x: x.split()	pca,palignment,partial_cognate_alignment
+pcogsets	lambda x: [int(i) for i in x.split()]	partial_cognate_sets,pcogset,pcs
+partial_ids	lambda x:[int(s) for s in x.split()]	partialid,partialids,partial_ids
+cogids	lambda x:[int(s) for s in x.split()]	cogids
+crossids	lambda x: [int(s) for s in x.split()]	crossids
+
+# new namespaces for clpa
+clpa_segments	lambda x: x.split(" ")	clpa_segments,clpa_tokens
+clpa_ids	lambda x: x.split(" ")	clpa_ids,clpa
+
+# new namespaces for cldf
+cognate_set	int	cognate_set
+cognate_sets	lambda x: [int(y) for y in x.split(" ")]	cognate_sets

@@ -1,0 +1,9 @@
+[cldfbench.commands]
+lexibank = pylexibank.commands
+
+[cldfbench.scaffold]
+lexibank_combined = pylexibank.scaffold:LexibankCombinedTemplate
+lexibank_simple = pylexibank.scaffold:LexibankTemplate
+
+[console_scripts]
+cldf = pycldf.__main__:main

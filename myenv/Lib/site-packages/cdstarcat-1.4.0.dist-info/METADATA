@@ -1,0 +1,105 @@
+Metadata-Version: 2.1
+Name: cdstarcat
+Version: 1.4.0
+Summary: Manage objects in a CDSTAR instance through a catalog
+Home-page: https://github.com/dlce-eva/cdstarcat
+Author: Robert Forkel
+Author-email: robert_forkel@eva.mpg.de
+License: Apache 2.0
+Project-URL: Bug Tracker, https://github.com/dlce-eva/cdstarcat/issues
+Platform: any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: License :: OSI Approved :: Apache Software License
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+Requires-Dist: attrs (>=18.1)
+Requires-Dist: clldutils (>=3.5)
+Requires-Dist: pycdstar (>=1.0.0)
+Provides-Extra: dev
+Requires-Dist: build ; extra == 'dev'
+Requires-Dist: flake8 ; extra == 'dev'
+Requires-Dist: tox ; extra == 'dev'
+Requires-Dist: twine ; extra == 'dev'
+Requires-Dist: wheel (>=0.36) ; extra == 'dev'
+Provides-Extra: test
+Requires-Dist: coverage (>=4.2) ; extra == 'test'
+Requires-Dist: pytest-cov ; extra == 'test'
+Requires-Dist: pytest-mock ; extra == 'test'
+Requires-Dist: pytest (>=3.6) ; extra == 'test'
+
+# cdstarcat
+
+[![Build Status](https://github.com/clld/cdstarcat/workflows/tests/badge.svg)](https://github.com/clld/cdstarcat/actions?query=workflow%3Atests)
+[![PyPI](https://img.shields.io/pypi/v/cdstarcat.svg)](https://pypi.python.org/pypi/cdstarcat)
+
+Manage objects in a CDSTAR instance using a local catalog.
+
+
+## Install
+
+Running
+```shell
+pip install cdstarcat
+```
+
+will install the `cdstarcat` package as well as a commandline interface `cdstarcat`.
+
+For developing `cdstarcat`, clone the repository `clld/cdstarcat` and run
+```shell
+cd cdstarcat
+pip install -r requirements.txt
+```
+
+
+## CLI
+
+Run
+```shell
+cdstarcat --help
+```
+to get a list of available subcommands, and
+```shell
+cdstarcat help SUBCOMMAND
+```
+to get usage information for a particular subcommand.
+
+
+## cdstarcat API
+
+Typically, `cdstarcat` will be used programmatically, to implement recurring media file maintenance tasks
+within projects - such as 
+[uploading media files for a new submission to Dictionaria](https://github.com/dictionaria/dictionaria-intern/blob/292644d23c0495d5a339bae1a0696ffe3129dcbf/pydictionaria/commands.py#L22-L42).
+
+In the simplest case this could look as follows:
+```python
+import os
+from cdstarcat import Catalog
+
+def upload(directory):
+    with Catalog(
+        os.environ['CDSTAR_CATALOG'],
+        cdstar_url=os.environ['CDSTAR_URL'],
+        cdstar_user=os.environ['CDSTAR_USER'],
+        cdstar_pwd=os.environ['CDSTAR_PWD']
+    ) as cat:
+        md = {
+            'collection': 'PROJECT NAME',
+            'path': '%s' % directory,
+        }
+        for fname, created, obj in cat.create(directory, md):
+            print('{0} -> {1}'.format(fname, obj.id))
+```
+
+

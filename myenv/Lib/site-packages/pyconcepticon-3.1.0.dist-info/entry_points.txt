@@ -1,0 +1,2 @@
+[console_scripts]
+concepticon = pyconcepticon.__main__:main

@@ -1,0 +1,3 @@
+[console_scripts]
+linglit = linglit.__main__:main
+
